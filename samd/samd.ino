@@ -20,6 +20,7 @@ bool flagsendmsg=false;
 bool passthroughMode;
 const int passthroughPin=12;
 void setup() {
+
     pinMode(12, INPUT);
     passthroughMode=digitalRead(passthroughPin);
     if(passthroughMode){
@@ -29,6 +30,11 @@ void setup() {
         digitalWrite(LED_BUILTIN, HIGH);
         NinaPassthrough::begin();
     }else{
+
+
+        Web::begin();
+        Web::loop();
+        /*
         pinMode(LED_BUILTIN, OUTPUT);
         Serial.begin(9600);
 
@@ -47,16 +53,18 @@ void setup() {
         setInterval([](TimeoutInterval* ti){
             flagsendmsg=true;
         },100);
+        */
     }
 }
 
 char cmd[256];
 int cmdidx=0;
 void loop() {
+
     if(passthroughMode){
         NinaPassthrough::loop();
 
-    }else{
+    }else{/*
         {
             int byte = Serial.read();
             if(byte!=-1){
@@ -79,6 +87,6 @@ void loop() {
 
 
         if(flagsendmsg)Web::sendEvent("fred","hola");
-        flagsendmsg=false;
+        flagsendmsg=false;*/
     }
 }
