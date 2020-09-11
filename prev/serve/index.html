@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js" integrity="sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==" crossorigin="anonymous"></script>
+    <script src="graph.js" charset="utf-8"></script>
+    <script src="index.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="index.css">
+
+</head>
+
+<body>
+    <input type="radio" id="statsRadio" name="tab" checked>
+    <input type="radio" id="drawRadio" name="tab">
+    <div id=wrapper>
+        <div id="title">JankCNC</div>
+
+
+        <div id="navbar">
+            <label for="statsRadio">Stats</label>
+            <label for="drawRadio">Draw</label>
+        </div>
+        <div class="page" id="statsPage">
+            <div>
+                <div id="leftrightposition">
+                    <div class="subtitle">
+                        Left-right position
+                    </div>
+                    <div id="leftrightgraph" class="graph-container"></div>
+                </div>
+                <div id="updownposition">
+                    <div class="subtitle">
+                        Up down position
+                    </div>
+                    <div id="updowngraph" class="graph-container"></div>
+                </div>
+
+            </div>
+            <div class="page" id="drawPage">
+                b
+            </div>
+
+        </div>
+</body>
+
+</html>

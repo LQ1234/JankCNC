@@ -14,8 +14,6 @@ namespace Web{
     int status = WL_IDLE_STATUS;
 
     WiFiClient eventStreamClients[CONFIG_LWIP_MAX_SOCKETS];
-    Pair updatedDictionaryPair;
-
 
     void setupServer() {;
 
@@ -96,56 +94,23 @@ namespace Web{
             len_left-=written;
         }
     }
-
-    void sendEvent(WiFiClient& client,const char* eventname,const char* body){
-        if(client.connected()){
-            client.write("event: ");
-            client.write(eventname);
-            client.write("\n");
-            client.write("data: ");
-            client.write(body);
-            client.write("\n");
-            client.write("\n");
-        }
-    }
-
     void sendEvent(const char* eventname,const char* body){
         for(int i=0;i<CONFIG_LWIP_MAX_SOCKETS;i++){
             WiFiClient client=eventStreamClients[i];
-            sendEvent(client,eventname,body);
-        }
-    }
-
-    void createEventStreamPairStr(const char* key,const char* val,char* target){
-        strncpy(target, key, 20);
-        strcat(target, ": ");
-        strncat(target, val, 80);
-    }
-
-    void processEventStreamRequest(WiFiClient& client){
-        for(int i=0;i<NUM_PAIRS;i++){
-            Pair pair=Dictionary::pairs[i];
-            if(pair.key[0]!=0){
-                char eventbody[120];
-                createEventStreamPairStr(pair.key,pair.value,eventbody);
-                sendEvent(client,"dictionary",eventbody);
+            if(client.connected()){
+                client.write("event: ");
+                client.write(eventname);
+                client.write("\n");
+                client.write("data: ");
+                client.write(body);
+                client.write("\n");
+                client.write("\n");
             }
         }
     }
-
-    void updatePair(Pair& pair){
-        Dictionary::set(pair.key,pair.value);
-
-        char eventbody[120];
-        createEventStreamPairStr(pair.key,pair.value,eventbody);
-        sendEvent("dictionary",eventbody);
-    }
-
     void processGETRequest(WiFiClient& client,const char* dir){
         if(strcmp(dir,"/eventstream")==0){
             sendHeader(client, 200, "text/event-stream", -1);
-            processEventStreamRequest(client);
-
             for(int i=0;i<CONFIG_LWIP_MAX_SOCKETS;i++){
                 if(!eventStreamClients[i].connected()){
                     eventStreamClients[i]=client;
@@ -163,64 +128,8 @@ namespace Web{
     }
 
     void processPOSTRequest(WiFiClient& client,const char* dir,int contLen){
-        char key[20];
-        char val[80];
-        int ch,i;
 
-        memset(key,0,sizeof(key));
-        memset(val,0,sizeof(val));
-
-        /*
-        ets_printf("NINA: DUMP (%d): ",contLen);
-        for(int i=0;i<contLen;i++){
-            do{
-                ch=client.read();
-            }while(ch==-1);
-            ets_printf("%c",ch);
-        }
-        ets_printf("\n");
-        */
-
-        i=0;
-        while(1){
-            ch=client.read();
-            if(ch==':') {
-                client.read();
-                break;
-            } else if(ch=='\n'||ch==-1) break;
-            else if(i==20);
-            else key[i++]=ch;
-        }
-        key[i]=0;
-
-        i=0;
-        while(1){
-            ch=client.read();
-            if(ch=='\n'||ch==-1) break;
-            else if(i==80);
-            else val[i++]=ch;
-        }
-        
-        ets_printf("NINA: key: ");
-        printbuf(key,20);
-        ets_printf("\nNINA: val: ");
-        printbuf(val,80);
-        ets_printf("\n");
-
-        ets_printf("NINA: post req %s -> %s\n", key, val);
-
-        if(updatedDictionaryPair.key[0]==0){
-            strncpy(updatedDictionaryPair.key,key,sizeof(updatedDictionaryPair.key));
-            strncpy(updatedDictionaryPair.value,val,sizeof(updatedDictionaryPair.value));
-
-            sendHeader(client, 200, "text/plain", 0);
-            client.stop();
-        }else{
-            sendHeader(client, 503, "text/plain", 0);
-            client.stop();
-        }
     }
-
 
     void processRequest(WiFiClient& client) {
         char method[10+1];
@@ -277,10 +186,7 @@ namespace Web{
                 if(ch==':') {
                     client.read();
                     break;
-                } else if(ch=='\n'||ch==-1){
-                    i=0;
-                    break;
-                }
+                } else if(ch=='\n'||ch==-1) break;
                 else if(i==100);
                 else key[i++]=ch;
             }
@@ -311,23 +217,17 @@ namespace Web{
             processGETRequest(client,dir);
         }else if(strcmp(method, "POST")==0){
             processPOSTRequest(client,dir,contLen);
-        }else{
-            ets_printf("NINA: Unknown req method %s\n",method);
-            client.stop();
         }
     }
 
     void processClients(){
         WiFiClient client = server.available();
         while (client) {
-            ets_printf("NINA: Processing request...\n");
+            ets_printf("Processing request...\n");
             processRequest(client);
             client = server.available();
-            ets_printf("NINA: Processed request.\n");
+            ets_printf("Processed request.\n");
 
         }
-    }
-    uint32_t getIP(){
-        return(WiFi.localIP());
     }
 }

@@ -17,41 +17,34 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef SPIS_H
-#define SPIS_H
+#ifndef WIFISERVER_H
+#define WIFISERVER_H
 
-#include <driver/spi_common.h>
-#include <driver/spi_slave.h>
+#include <sdkconfig.h>
 
-class SPISClass {
+#include <Arduino.h>
+// #include <Server.h>
 
-  public:
-    SPISClass(spi_host_device_t hostDevice, int dmaChannel, int mosiPin, int misoPin, int sclkPin, int csPin, int readyPin);
+class WiFiClient;
 
-    int begin();
-    int transfer(uint8_t out[], uint8_t in[], size_t len);
-
-  private:
-    static void onChipSelect();
-    void handleOnChipSelect();
-
-    static void onSetupComplete(spi_slave_transaction_t*);
-    void handleSetupComplete();
-
+class WiFiServer /*: public Server*/ {
 public:
-    spi_host_device_t _hostDevice;
-    int _dmaChannel;
-    int _mosiPin;
-    int _misoPin;
-    int _sclkPin;
-    int _csPin;
-    int _readyPin;
+  WiFiServer();
+  WiFiServer(uint16_t);
+  WiFiClient available(uint8_t* status = NULL);
+  void begin();
+  virtual size_t write(uint8_t);
+  virtual size_t write(const uint8_t *buf, size_t size);
+  uint8_t status();
 
-    intr_handle_t _csIntrHandle;
+  // using Print::write;
 
-    SemaphoreHandle_t _readySemaphore;
+  virtual operator bool();
+
+private:
+  uint16_t _port;
+  int _socket;
+  int _spawnedSockets[CONFIG_LWIP_MAX_SOCKETS];
 };
 
-extern SPISClass SPIS;
-
-#endif
+#endif // WIFISERVER_H

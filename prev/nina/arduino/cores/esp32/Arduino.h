@@ -17,41 +17,36 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef SPIS_H
-#define SPIS_H
+#ifndef ARDUINO_H
+#define ARDUINO_H
 
-#include <driver/spi_common.h>
-#include <driver/spi_slave.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-class SPISClass {
+#ifdef __cplusplus
+extern "C"{
+#endif // __cplusplus
 
-  public:
-    SPISClass(spi_host_device_t hostDevice, int dmaChannel, int mosiPin, int misoPin, int sclkPin, int csPin, int readyPin);
+// system functions
+void init(void);
 
-    int begin();
-    int transfer(uint8_t out[], uint8_t in[], size_t len);
+// sketch
+void setup(void);
+void loop(void);
 
-  private:
-    static void onChipSelect();
-    void handleOnChipSelect();
-
-    static void onSetupComplete(spi_slave_transaction_t*);
-    void handleSetupComplete();
-
-public:
-    spi_host_device_t _hostDevice;
-    int _dmaChannel;
-    int _mosiPin;
-    int _misoPin;
-    int _sclkPin;
-    int _csPin;
-    int _readyPin;
-
-    intr_handle_t _csIntrHandle;
-
-    SemaphoreHandle_t _readySemaphore;
-};
-
-extern SPISClass SPIS;
-
+#ifdef __cplusplus
+} // extern "C"
 #endif
+
+#ifdef __cplusplus
+  #include "WMath.h"
+#endif
+#include "delay.h"
+
+#include "wiring_digital.h"
+#include "wiring_analog.h"
+
+#endif // ARDUINO_H

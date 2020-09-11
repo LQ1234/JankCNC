@@ -18,8 +18,10 @@ extern "C" {
 #include "freertos/task.h"
 
 #include <Arduino.h>
+#include "util.h"
+#include "dictionary/dictionary.h"
 #include "web/web.h"
-
+#include "../../shared/message.h"
 
 #define SPI_BUFFER_LEN SPI_MAX_DMA_LEN
 
@@ -39,35 +41,60 @@ void initDebug(){
 	uart_tx_switch(CONFIG_CONSOLE_UART_NUM);
 }
 
-bool sendEventFlag=false;
-char* samdInBuf;
-char* samdOutBuf;
+
+
+SPIMsgCommand* spicmd;
+SPIMsgResult* spiresp;
+
 void eventStreamThread(void* params){
     while(1){
-        sendEventFlag=true;
+        memset(reinterpret_cast<unsigned char*>(spicmd),'B',sizeof(SPIMsgCommand));
+        //ets_printf("NINA: Waiting for transfer");
+        int rlen=SPIS.transfer(nullptr, reinterpret_cast<unsigned char*>(spicmd), SPI_BUFFER_LEN);
 
-        memset(samdInBuf,'B',21);
-        int rlen=SPIS.transfer(NULL, (unsigned char*)samdInBuf, SPI_BUFFER_LEN);
-        if(rlen==0)continue;
-        ets_printf("NINA: RECEIVED\n");
-        ets_printf("NINA (len %d): ",rlen);
-        samdInBuf[20]=0;
-        ets_printf(samdInBuf);
-        ets_printf("\n");
-
-        delay(50);
-
-        ets_printf("NINA: SENDING\n");
-        int num=SPIS.transfer((unsigned char*)samdOutBuf, (unsigned char*)samdInBuf, strlen(samdOutBuf));
-        ets_printf("NINA: SENT %d\n",num);
         /*
-        ets_printf("NINA: ALSO RECIEVED\n");
-        ets_printf("NINA:");
-        samdInBuf[20]=0;
-        ets_printf(samdInBuf);
-        ets_printf("\n");*/
-    }
+        ets_printf("NINA: RECEIVED ");
+        printbuf(&cmd,rlen);
+        ets_printf("\n");
+*/
 
+        if(rlen!=sizeof(SPIMsgCommand))continue;
+
+        spiresp->type=spicmd->type;
+        memset(spiresp->data.echo,0,100);
+
+        switch(spicmd->type){
+            case SPIMsgType::SETPAIR:
+            ets_printf("NINA: COMMAND SETPAIR %s -> %s\n",spicmd->data.setpair.key,spicmd->data.setpair.value);
+            Web::updatePair(spicmd->data.setpair);
+            break;
+
+            case SPIMsgType::GETIP:
+            ets_printf("NINA: COMMAND GETIP\n");
+            spiresp->data.getip=Web::getIP();
+            ets_printf("NINA: returning %d\n",spiresp->data.getip);
+            break;
+
+            case SPIMsgType::GETPAIR:
+            //ets_printf("NINA: COMMAND GETPAIR\n");
+            spiresp->data.getpair=Web::updatedDictionaryPair;
+            memset(Web::updatedDictionaryPair.key,0,20);
+            break;
+
+            case SPIMsgType::ECHO:
+            memcpy(spiresp->data.echo,spicmd->data.echo,100);
+            break;
+
+        }
+        //ets_printf("NINA: CSA: %s\n",digitalRead(SPIS._csPin)?"high":"low");
+
+        delay(1);
+        //ets_printf("NINA: CSB: %s\n",digitalRead(SPIS._csPin)?"high":"low");
+
+        int num=SPIS.transfer(reinterpret_cast<unsigned char*>(spiresp), nullptr, sizeof(SPIMsgResult));
+        delay(1);
+
+    }
 }
 
 
@@ -81,9 +108,8 @@ void setup(){
     esp_bt_controller_mem_release(ESP_BT_MODE_BTDM);
 
     SPIS.begin();
-    samdInBuf=(char*)heap_caps_malloc(SPI_BUFFER_LEN, MALLOC_CAP_DMA);
-    samdOutBuf=(char*)heap_caps_malloc(SPI_BUFFER_LEN, MALLOC_CAP_DMA);
-    strcpy(samdOutBuf,"message from ninaPAD");
+    spicmd=reinterpret_cast<SPIMsgCommand*>(heap_caps_malloc(SPI_BUFFER_LEN, MALLOC_CAP_DMA));
+    spiresp=reinterpret_cast<SPIMsgResult*>(heap_caps_malloc(SPI_BUFFER_LEN, MALLOC_CAP_DMA));
 
 
 
@@ -94,14 +120,10 @@ void setup(){
     xTaskCreatePinnedToCore(eventStreamThread, "eventStreamThread", 8192, NULL, 2, NULL, 0);
 
     ets_printf("NINA: start\n");
+    ets_printf("NINA: SPIMsgCommand %d SPIMsgResult %d\n",sizeof(SPIMsgCommand),sizeof(SPIMsgResult));
 }
 
 void loop(){
     Web::processClients();
-    if(sendEventFlag){
-        Web::sendEvent("test","fred");
-        sendEventFlag=false;
-
-    }
     delay(10);
 }

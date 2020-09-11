@@ -38,7 +38,7 @@ class SPISClass {
     static void onSetupComplete(spi_slave_transaction_t*);
     void handleSetupComplete();
 
-public:
+  private:
     spi_host_device_t _hostDevice;
     int _dmaChannel;
     int _mosiPin;
@@ -55,3 +55,4 @@ public:
 extern SPISClass SPIS;
 
 #endif
+

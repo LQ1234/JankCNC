@@ -17,41 +17,29 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef SPIS_H
-#define SPIS_H
+#include <driver/ledc.h>
 
-#include <driver/spi_common.h>
-#include <driver/spi_slave.h>
+#include "wiring_analog.h"
 
-class SPISClass {
+void analogWrite(uint32_t pin, uint32_t value)
+{
+  periph_module_enable(PERIPH_LEDC_MODULE);
 
-  public:
-    SPISClass(spi_host_device_t hostDevice, int dmaChannel, int mosiPin, int misoPin, int sclkPin, int csPin, int readyPin);
+  ledc_timer_config_t timerConf = {
+    .bit_num = LEDC_TIMER_10_BIT,
+    .freq_hz = 1000,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .timer_num = (pin / 7),
+  };
+  ledc_timer_config(&timerConf);
 
-    int begin();
-    int transfer(uint8_t out[], uint8_t in[], size_t len);
-
-  private:
-    static void onChipSelect();
-    void handleOnChipSelect();
-
-    static void onSetupComplete(spi_slave_transaction_t*);
-    void handleSetupComplete();
-
-public:
-    spi_host_device_t _hostDevice;
-    int _dmaChannel;
-    int _mosiPin;
-    int _misoPin;
-    int _sclkPin;
-    int _csPin;
-    int _readyPin;
-
-    intr_handle_t _csIntrHandle;
-
-    SemaphoreHandle_t _readySemaphore;
-};
-
-extern SPISClass SPIS;
-
-#endif
+  ledc_channel_config_t ledc_conf = {
+    .channel = (pin % 7),
+    .duty = (value << 2),
+    .gpio_num = pin,
+    .intr_type = LEDC_INTR_DISABLE,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .timer_sel = (pin / 7)
+  };
+  ledc_channel_config(&ledc_conf);
+}

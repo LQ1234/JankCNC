@@ -17,41 +17,27 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef SPIS_H
-#define SPIS_H
+#ifndef _WIRING_INTERRUPTS_
+#define _WIRING_INTERRUPTS_
 
-#include <driver/spi_common.h>
-#include <driver/spi_slave.h>
+#include <stdint.h>
 
-class SPISClass {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-  public:
-    SPISClass(spi_host_device_t hostDevice, int dmaChannel, int mosiPin, int misoPin, int sclkPin, int csPin, int readyPin);
+// #define LOW     0
+// #define HIGH    1
+#define CHANGE  2
+#define FALLING 3
+#define RISING  4
 
-    int begin();
-    int transfer(uint8_t out[], uint8_t in[], size_t len);
+typedef void (*voidFuncPtr)(void);
 
-  private:
-    static void onChipSelect();
-    void handleOnChipSelect();
+void attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode);
 
-    static void onSetupComplete(spi_slave_transaction_t*);
-    void handleSetupComplete();
-
-public:
-    spi_host_device_t _hostDevice;
-    int _dmaChannel;
-    int _mosiPin;
-    int _misoPin;
-    int _sclkPin;
-    int _csPin;
-    int _readyPin;
-
-    intr_handle_t _csIntrHandle;
-
-    SemaphoreHandle_t _readySemaphore;
-};
-
-extern SPISClass SPIS;
+#ifdef __cplusplus
+}
+#endif
 
 #endif
