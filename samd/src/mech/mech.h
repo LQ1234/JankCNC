@@ -80,7 +80,6 @@ namespace Mech{
         pinMode(upperDetectPin, INPUT_PULLUP);
 
 
-        // put your setup code here, to run once:
         //resetUpDown();
         //setLeftRight(10);
         //servoRight.write(10);
@@ -93,6 +92,16 @@ namespace Mech{
 
         }
         void eval(const char* cmd){
+
+            Serial.print("Command: ");
+            Serial.print(cmd);
+            Serial.print("\n");
+
+            char newlined[100];
+            strcpy(newlined,cmd);
+            strcat(newlined,"\n");
+            printSerial(newlined);
+
             if(strcmp(cmd,"left")==0){
                 setLeftRight(-20);
                 setTimeout([](TimeoutInterval* tc){
@@ -150,10 +159,36 @@ namespace Mech{
 
             if(strncmp(cmd,"setdur ",7)==0){
                 dur=atoi(cmd+7);
-                Serial.print("Set dur to ");
-                Serial.println(dur);
+
+                char str[5];
+                itoa(dur, str, 10);
+
+                strcpy(newlined,"Set dur to ");
+                strcat(newlined,str);
+                strcat(newlined,"\n");
+                printSerial(newlined);
             }
 
+            if(strcmp(cmd,"vertup")==0){
+                setUpDown(20);
+            }
+            if(strcmp(cmd,"vertstop")==0){
+                setUpDown(0);
+            }
+            if(strcmp(cmd,"vertdown")==0){
+                setUpDown(-20);
+            }
+
+
+            if(strcmp(cmd,"horleft")==0){
+                setLeftRight(-20);
+            }
+            if(strcmp(cmd,"horstop")==0){
+                setLeftRight(0);
+            }
+            if(strcmp(cmd,"horright")==0){
+                setLeftRight(20);
+            }
         }
         void end(){
 

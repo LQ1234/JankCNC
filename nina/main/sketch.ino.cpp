@@ -54,9 +54,9 @@ void eventStreamThread(void* params){
 
         /*
         ets_printf("NINA: RECEIVED ");
-        printbuf(&cmd,rlen);
+        printbuf(spicmd,rlen);
         ets_printf("\n");
-*/
+        */
 
         if(rlen!=sizeof(SPIMsgCommand))continue;
 
@@ -65,7 +65,8 @@ void eventStreamThread(void* params){
 
         switch(spicmd->type){
             case SPIMsgType::SETPAIR:
-            ets_printf("NINA: COMMAND SETPAIR %s -> %s\n",spicmd->data.setpair.key,spicmd->data.setpair.value);
+            //ets_printf("NINA: COMMAND SETPAIR %s -> %s\n",spicmd->data.setpair.key,spicmd->data.setpair.value);
+            ets_printf("NINA: COMMAND SETPAIR\n");
             Web::updatePair(spicmd->data.setpair);
             break;
 
@@ -91,7 +92,15 @@ void eventStreamThread(void* params){
         delay(1);
         //ets_printf("NINA: CSB: %s\n",digitalRead(SPIS._csPin)?"high":"low");
 
+        /*
+        ets_printf("NINA: SENDING ");
+        printbuf(spiresp,sizeof(SPIMsgResult));
+        ets_printf("\n");
+        */
+        
         int num=SPIS.transfer(reinterpret_cast<unsigned char*>(spiresp), nullptr, sizeof(SPIMsgResult));
+        //ets_printf("NINA: SENT %d\n", num);
+
         delay(1);
 
     }

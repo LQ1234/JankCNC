@@ -65,6 +65,8 @@ namespace NinaSPI{
         digitalWrite(SLAVESELECT,LOW);
 
         for (unsigned long start = millis(); digitalRead(SLAVEREADY) != LOW;){
+            NinaPassthrough::pipe();
+
             if(millis() - start > 15){
                 digitalWrite(SLAVESELECT,HIGH);
                 SPIWIFI.endTransaction();
@@ -86,10 +88,7 @@ namespace NinaSPI{
 
         /*
         Serial.print("SAMD: Sending ");
-        for(int i=0;i<datalen;i++){
-            Serial.print(data[i], HEX);
-            Serial.print(" ");
-        }
+        printbuf(data,datalen);
         Serial.println();
         */
 
@@ -101,6 +100,8 @@ namespace NinaSPI{
         slavedeselect();
 
         for (unsigned long start = millis(); (digitalRead(SLAVEREADY) != HIGH);){
+            NinaPassthrough::pipe();
+
             if(millis() - start > 5){
                 didtimeout=true;
                 //Serial.println("NINA: TIMEOUT");
@@ -117,7 +118,13 @@ namespace NinaSPI{
         for(int i=0;i<resultlen;i++){
             result[i]=SPIWIFI.transfer('A');
         }
-        //Serial.println("SAMD: Received");
+
+        /*
+        Serial.print("SAMD: Received ");
+        printbuf(result,resultlen);
+        Serial.println();
+        */
+        
         //Serial.println("SAMD: C");
 
         slavedeselect();

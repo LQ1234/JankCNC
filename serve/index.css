@@ -1,3 +1,4 @@
+/*bruh*/
 body{
     font-family: Arial, Helvetica, sans-serif;
 }
@@ -99,12 +100,14 @@ body > input{
 }
 /*css :(*/
 #statsRadio:checked ~ #wrapper #navbar > label[for="statsRadio"],
-#drawRadio:checked ~ #wrapper #navbar > label[for="drawRadio"]{
+#drawRadio:checked ~ #wrapper #navbar > label[for="drawRadio"],
+#serialRadio:checked ~ #wrapper #navbar > label[for="serialRadio"]{
     border-bottom: 1px solid white;
 }
 
 #statsRadio:checked ~ #wrapper #statsPage,
-#drawRadio:checked ~ #wrapper #drawPage{
+#drawRadio:checked ~ #wrapper #drawPage,
+#serialRadio:checked ~ #wrapper #serialPage{
     display:block;
 }
 
@@ -130,4 +133,85 @@ body > input{
     font-size: 1.2em;
     border-bottom: 1px solid black;
     margin-bottom: .5em;
+}
+
+
+#serialPage .interface {
+    width: 100%;
+    border: 1px solid black;
+    display: grid;
+    grid-template-rows: auto 2.3em;
+    height: calc(90vh - 8em);
+    resize: vertical;
+    overflow: auto;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: .8;
+    position: relative;
+}
+#serialPage .history-wrapper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: table;
+    grid-column: 1/1;
+}
+#serialPage .history {
+    padding: .5em .6em;
+    overflow: auto;
+    line-height: 1.5em;
+    white-space: pre-wrap;
+    position: relative;
+    display: table-cell;
+    grid-column: 1/1;
+}
+#serialPage .input {
+    border-top: 1px solid black;
+    overflow: none;
+}
+#serial-inputfield{
+    width:100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding-left: .5em;
+    font-size: .95em;
+    font-family: inherit;
+}
+#serial-arrowpad{
+    border: 1px solid black;
+    width:3em;
+    height:3em;
+    position: absolute;
+    bottom: calc(.5em + calc(2.5em + 1px)); /* :| */
+    right: 1.5em;
+    z-index: 2;
+
+    display: grid;
+    grid-template-rows: 33% 33% 33%;
+    grid-template-columns: 33% 33% 33%;
+    background-color: white;
+}
+#serial-arrowpad > *{
+    background-color: white;
+    text-align: center;
+    line-height: 100%;
+}
+#serial-arrowpad-up{
+    grid-column: 2/2;
+    grid-row: 1/1;
+}
+#serial-arrowpad-down{
+    grid-column: 2/2;
+    grid-row: 3/3;
+}
+#serial-arrowpad-left{
+    grid-column: 1/1;
+    grid-row: 2/2;
+}
+#serial-arrowpad-right{
+    grid-column: 3/3;
+    grid-row: 2/2;
+}
+#serial-arrowpad-center{
+    grid-column: 2/2;
+    grid-row: 2/2;
 }

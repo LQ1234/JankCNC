@@ -1,12 +1,14 @@
 #include "avr/dtostrf.h"
 
+void printSerial(const char*);
+
+#include "src/util.h"
 #include "src/timerTimeoutInterval/timerTimeoutInterval.h"
 #include "shared/message.h"
 #include "src/lcd/lcd.h"
 #include "src/ninaSPI/ninaSPI.h"
 #include "src/mech/mech.h"
 #include "src/NinaPassthrough/ninaPassthrough.h"
-#include "src/util.h"
 
 
 using TimerTimeout::TimeoutInterval;
@@ -20,6 +22,17 @@ const int passthroughPin=12;
 
 
 float test_value;
+
+void (*serialHandler)(char*);
+void printSerial(const char* data){
+    Serial.print(data);
+    Pair p;
+    strcpy(p.key,"serial");
+    strcpy(p.value,data);
+    NinaSPI::sendUpdatePair(p);
+}
+
+
 void setup() {
 
     pinMode(12, INPUT);
@@ -35,7 +48,7 @@ void setup() {
         }
     }
 
-    while(Serial.read()==-1);
+    //while(Serial.read()==-1);
 
     NinaSPI::begin();
 
@@ -48,26 +61,36 @@ void setup() {
 
     Mech::ManualController::begin();
 
+
     NinaSPI::valueUpdateHandler=[](Pair p){
         NinaSPI::updateFloatPair(p, "test_value", test_value);
-    };
 
+        Serial.print("SAMD: MESSAGE ");
+        printbuf(p.key,20);
+        Serial.print("-> ");
+        printbuf(p.value,80);
+        Serial.println();
+
+
+        if(strcmp(p.key,"serial")==0){
+            serialHandler(p.value);
+        }
+    };
+    serialHandler=[](char* cmd){
+        Mech::ManualController::eval(cmd);
+    };
 }
 
 char cmd[256];
 int cmdidx=0;
 
 void loop() {
-
     {
         int byte = Serial.read();
         if(byte!=-1){
             if(byte=='\n'){
                 cmd[cmdidx]=0;
-                //Serial.print("Command: ");
-                //Serial.println(cmd);
-                Mech::ManualController::eval(cmd);
-
+                serialHandler(cmd);
                 cmdidx=0;
             }else{
                 cmd[cmdidx]=byte;
@@ -77,30 +100,7 @@ void loop() {
     }
 
     NinaSPI::updateValues();
-    /*
-    {
-        SPIMsgCommand cmd;
-        cmd.type=SPIMsgType::ECHO;
-        for(int i=0;i<100;i++){
-            cmd.data.echo[i]=i;
-        }
 
-        SPIMsgResult res;
-        memset(reinterpret_cast<char*>(&res),'d',sizeof(res));
-        Serial.println("SAMD: Doing echo");
-        NinaSPI::vertsend(reinterpret_cast<char*>(&cmd),sizeof(cmd),reinterpret_cast<char*>(&res),sizeof(res));
-
-        for(int i=0;i<100;i++){
-            if(cmd.data.echo[i]!=res.data.echo[i]){
-                Serial.print("SAMD: Echo Failed\n  -A- ");
-                printbuf(cmd.data.echo,sizeof(cmd.data.echo));
-                Serial.print("\n  -B- ");
-                printbuf(res.data.echo,sizeof(res.data.echo));
-                Serial.println();
-                break;
-            }
-        }
-    }*/
     NinaPassthrough::pipe();
-
+    //delay(500);
 }

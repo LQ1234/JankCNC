@@ -71,7 +71,9 @@ namespace Web{
 
         if(length>=0){
             client.write("Content-Length: ");
-            client.write(length);
+            char lenstr[8];
+            itoa(length, lenstr, 10);
+            client.write(lenstr);
             client.write("\r\n");
         }
 
@@ -103,7 +105,14 @@ namespace Web{
             client.write(eventname);
             client.write("\n");
             client.write("data: ");
-            client.write(body);
+            int len=strlen(body);
+            for(int i=0;i<len;i++){
+                if(body[i]=='\n'){
+                    client.write("\ndata: ");
+                }else{
+                    client.write(body[i]);
+                }
+            }
             client.write("\n");
             client.write("\n");
         }
@@ -200,7 +209,7 @@ namespace Web{
             else if(i==80);
             else val[i++]=ch;
         }
-        
+
         ets_printf("NINA: key: ");
         printbuf(key,20);
         ets_printf("\nNINA: val: ");

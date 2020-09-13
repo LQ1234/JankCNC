@@ -53,6 +53,7 @@ namespace NinaPassthrough{
 
         while (SerialNina.available()) {
             Serial.write(SerialNina.read());
+            delayMicroseconds(100);
         }
 
         if (Serial.baud() != baud) {    // check if the USB virtual serial wants a new baud rate

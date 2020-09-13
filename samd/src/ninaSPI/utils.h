@@ -15,7 +15,7 @@ namespace NinaSPI{
         SPIMsgResult res;
         if(!NinaSPI::vertsend(reinterpret_cast<char*>(&cmd),sizeof(cmd),reinterpret_cast<char*>(&res),sizeof(res)))return;
 
-        Serial.println("SAMD: Updating");
+        //Serial.println("SAMD: Updating");
     }
 
     void updateFloatPair(const Pair pair, const char* key,float &value){

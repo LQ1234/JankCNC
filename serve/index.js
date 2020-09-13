@@ -12,7 +12,12 @@ window.onload=()=>{
 
     var events = new EventSource('eventstream');
 
-    events.onmessage = function(event) {
-        console.log(event.data);
-    }
+    initSerial((name,handler)=>{
+        events.addEventListener("dictionary", (e) => {
+            let indx=e.data.indexOf(":");
+            let key=e.data.slice(0,indx);
+            let val=e.data.slice(indx+2);
+            if(key==name)handler(val);
+        });
+    });
 }

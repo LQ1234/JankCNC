@@ -7,14 +7,17 @@
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js" integrity="sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==" crossorigin="anonymous"></script>
     <script src="graph.js" charset="utf-8"></script>
+    <script src="serial.js" charset="utf-8"></script>
+
     <script src="index.js" charset="utf-8"></script>
     <link rel="stylesheet" href="index.css">
 
 </head>
 
 <body>
-    <input type="radio" id="statsRadio" name="tab" checked>
+    <input type="radio" id="statsRadio" name="tab">
     <input type="radio" id="drawRadio" name="tab">
+    <input type="radio" id="serialRadio" name="tab" checked>
     <div id=wrapper>
         <div id="title">JankCNC</div>
 
@@ -22,6 +25,7 @@
         <div id="navbar">
             <label for="statsRadio">Stats</label>
             <label for="drawRadio">Draw</label>
+            <label for="serialRadio">Serial</label>
         </div>
         <div class="page" id="statsPage">
             <div>
@@ -39,10 +43,25 @@
                 </div>
 
             </div>
-            <div class="page" id="drawPage">
-                b
-            </div>
+        </div>
+        <div class="page" id="drawPage">
+            b
+        </div>
+        <div class="page" id="serialPage">
+            <div class="interface">
+                <div class="history" id="serial-history">asd<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>asd</div>
+                <div id="serial-arrowpad" tabindex="1">
+                    <div id="serial-arrowpad-up">⇧</div>
+                    <div id="serial-arrowpad-down">⇩</div>
+                    <div id="serial-arrowpad-left">⇦</div>
+                    <div id="serial-arrowpad-right">⇨</div>
+                    <div id="serial-arrowpad-center"></div>
+                </div>
+                <div class="input">
+                    <input id="serial-inputfield" type="text" name="" value="">
+                </div>
 
+            </div>
         </div>
 </body>
 
